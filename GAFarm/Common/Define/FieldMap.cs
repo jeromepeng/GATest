@@ -9,7 +9,7 @@ namespace GAFarm.Common.Define
     public class FieldMap : IMap, IDisposable
     {
         #region Private Member
-        private int[] mapData;
+        private ICreature[] mapData;
 
         private int width;
 
@@ -24,7 +24,7 @@ namespace GAFarm.Common.Define
         #region Interface Implement
         public void InitialMap(int width, int height)
         {
-            mapData = new int[width * height];
+            mapData = new ICreature[width * height];
             ClearMap();
             this.width = width;
             this.height = height;
@@ -36,7 +36,7 @@ namespace GAFarm.Common.Define
             {
                 for (int j = 0; j < width; j++)
                 {
-                    mapData[i * width + j] = 0;
+                    mapData[i * width + j] = null;
                 }
             }
             List<object> items = new List<object>();
@@ -80,9 +80,9 @@ namespace GAFarm.Common.Define
             {
                 for (int j = y - size; j < y + size; j++)
                 {
-                    if (mapData[j * width + i] != 0)
+                    if (mapData[j * width + i] != null)
                     {
-                        results.Add(FindCreatureByName(mapData[j * width + i]));
+                        results.Add(FindCreatureByName(mapData[j * width + i].ID));
                         break;
                     }
                 }
@@ -112,12 +112,12 @@ namespace GAFarm.Common.Define
 
         public void DrawCreature(ICreature creature)
         {
-            mapData[(int)creature.CurrentY * this.width + (int)creature.CurrentX] = creature.ID;
+            mapData[(int)creature.CurrentY * this.width + (int)creature.CurrentX] = creature;
         }
 
         public void EraseCreature(ICreature creature)
         {
-            mapData[(int)creature.CurrentY * this.width + (int)creature.CurrentX] = 0;
+            mapData[(int)creature.CurrentY * this.width + (int)creature.CurrentX] = null;
         }
 
         public void Dispose()
@@ -133,7 +133,7 @@ namespace GAFarm.Common.Define
         #endregion
 
         #region Public Member
-        public int[] MapData
+        public ICreature[] MapData
         {
             get
             {

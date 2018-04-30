@@ -45,6 +45,8 @@ namespace GAFarm.Common.CreatureObject
 
         private int id = 0;
 
+        private int type = 0;
+
         #endregion
 
         #region Interface Implement
@@ -64,7 +66,15 @@ namespace GAFarm.Common.CreatureObject
             }
         }
 
-        public void Create(GA.Common.Creature feature, ICreatureAction creatureAction)
+        public int Type
+        {
+            get
+            {
+                return this.type;
+            }
+        }
+
+        public void Create(GA.Common.Creature feature, ICreatureAction creatureAction, int type)
         {
             currentX = bornX = feature.Value[0];
             currentY = bornY = feature.Value[1];
@@ -73,6 +83,9 @@ namespace GAFarm.Common.CreatureObject
             currentDirection = moveDirStep;
             id = feature.Name.GetHashCode();
             this.hunterAction = creatureAction;
+            actionTimerForMove = new ActionTimer(42, new ActionControl.TimerAction(Move));
+            this.type = type;
+            //actionTimerForMove.StartTimer();
         }
 
         public void Move()
@@ -92,6 +105,7 @@ namespace GAFarm.Common.CreatureObject
         public void Die()
         {
             isDead = true;
+            actionTimerForMove.StopTimer();
         }
 
         public void ScanStart()
@@ -184,7 +198,7 @@ namespace GAFarm.Common.CreatureObject
                     restMoveLength = moveLength;
                     hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
                 }
-                else
+                else if (scanResult.TargetCreature.Type == 1)
                 {
                     Eat(scanResult.TargetCreature);
                 }

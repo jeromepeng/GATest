@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Action\ActionControl\ActionDelegate.cs" />
     <Compile Include="Action\ActionControl\ActionHunter.cs" />
+    <Compile Include="Action\ActionControl\ActionPrey.cs" />
     <Compile Include="Action\ActionControl\ActionTimer.cs" />
     <Compile Include="Common\CreatureObject\Hunter.cs" />
     <Compile Include="Common\Define\FieldMap.cs" />

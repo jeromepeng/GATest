@@ -19,9 +19,12 @@ namespace GAFarm
     public partial class FarmField : Form
     {
         static int creatureNum = 50;
+        static int preyNum = 50;
         Hunter[] hunters = new Hunter[creatureNum];
+        Hunter[] preies = new Hunter[preyNum];
         ActionControl.ActionTimer mapTimer;
         Pen pen = new Pen(Color.White);
+        Pen penPrey = new Pen(Color.Blue);
         Graphics graphic;
         public FarmField()
         {
@@ -62,8 +65,14 @@ namespace GAFarm
             for (int i = 0; i < creatureNum; i++)
             {
                 hunters[i] = new Hunter();
-                hunters[i].Create(radomHunterCreature[i], new ActionHunter());
+                hunters[i].Create(radomHunterCreature[i], new ActionHunter(), 0);
                 MapManager.GetMapFromIndex(0).AddCreature(hunters[i]);
+            }
+            for (int i = 0; i < preyNum; i++)
+            {
+                preies[i] = new Hunter();
+                preies[i].Create(radomFoodCreature[i], new ActionPrey(), 1);
+                MapManager.GetMapFromIndex(0).AddCreature(preies[i]);
             }
             DrawMap();
             mapTimer.StartTimer();
@@ -93,11 +102,30 @@ namespace GAFarm
             {
                 for (int j = 0; j < MapManager.GetMapFromIndex(0).Width; j++)
                 {
-                    if (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j] != 0)
+                    if (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j] != null)
                     {
-                        Tools.FieldToClient(j, i, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
-                        graphicBmp.DrawRectangle(pen, newX - 5, newY - 5, 10, 10);
-                        graphic.DrawImage(bmp, 0, 0);
+                        switch (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].Type)
+                        {
+                            case 0:
+                                {
+                                    Tools.FieldToClient(j, i, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+                                    graphicBmp.DrawRectangle(pen, newX - 5, newY - 5, 10, 10);
+                                    graphic.DrawImage(bmp, 0, 0);
+                                    break;
+                                }
+                            case 1:
+                                {
+                                    Tools.FieldToClient(j, i, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+                                    graphicBmp.DrawRectangle(penPrey, newX - 3, newY - 3, 6, 6);
+                                    graphic.DrawImage(bmp, 0, 0);
+                                    break;
+                                }
+                            default:
+                                {
+                                    break;
+                                }
+                        }
+                        
                     }
                 }
             }

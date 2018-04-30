@@ -8,7 +8,7 @@ namespace GAFarm.Common.Interface
 {
     public interface IMap
     {
-        int[] MapData { get; }
+        ICreature[] MapData { get; }
 
         int Width { get; }
 

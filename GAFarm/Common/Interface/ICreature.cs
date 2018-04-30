@@ -24,7 +24,9 @@ namespace GAFarm.Common.Interface
 
         double Speed { get; }
 
-        void Create(GA.Common.Creature feature, ICreatureAction creatureAction);
+        int Type { get; }
+
+        void Create(GA.Common.Creature feature, ICreatureAction creatureAction, int type);
 
         void Move();
 
