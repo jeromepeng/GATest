@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 
 using GAFarm.Common.Define;
+using GA.Common;
+using GAFarm.Common.Interface;
+
 namespace GAFarm.Common.GeoTools
 {
     public class Tools
@@ -63,6 +66,14 @@ namespace GAFarm.Common.GeoTools
             {
                 result = true;
             }
+            return result;
+        }
+
+        public static Creature ConvertToGACreature(ICreature creature)
+        {
+            Creature result = new Creature();
+            result.Result = creature.LifeQuality;
+            result.Value = creature.GACreatureValues;
             return result;
         }
     }

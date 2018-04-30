@@ -51,6 +51,8 @@ namespace GAFarm.Common.CreatureObject
 
         private MoveResult lastMoveResult;
 
+        private int lifeQuality = 0;
+
         #endregion
 
         #region Interface Implement
@@ -133,6 +135,7 @@ namespace GAFarm.Common.CreatureObject
                         if (scanResults[i].TargetCreature.Type == 1 && !scanResults[i].TargetCreature.IsDead)
                         {
                             hunterAction.Eat(scanResults[i].TargetCreature);
+                            lifeQuality++;
                         }
                     }
                 }
@@ -204,6 +207,22 @@ namespace GAFarm.Common.CreatureObject
             set
             {
                 currentY = value;
+            }
+        }
+
+        public int LifeQuality
+        {
+            get
+            {
+                return lifeQuality;
+            }
+        }
+
+        public double[] GACreatureValues
+        {
+            get
+            {
+                return new double[] {currentX, currentY, moveDirStep, moveLength};   
             }
         }
         #endregion

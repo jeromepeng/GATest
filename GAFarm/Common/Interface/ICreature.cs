@@ -24,7 +24,11 @@ namespace GAFarm.Common.Interface
 
         double Speed { get; }
 
+        int LifeQuality { get; }
+
         int Type { get; }
+
+        double[] GACreatureValues { get; }
 
         void Create(GA.Common.Creature feature, ICreatureAction creatureAction, int type);
 

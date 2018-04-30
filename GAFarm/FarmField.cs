@@ -15,6 +15,7 @@ using GAFarm.Action.ActionControl;
 using GAFarm.Common.GeoTools;
 using GAFarm.Manager;
 using GAFarm.Common.Log;
+using GAFarm.Common.Interface;
 
 namespace GAFarm
 {
@@ -32,6 +33,10 @@ namespace GAFarm
         private int height;
         private int minX = 100;
         private int minY = -100;
+        private double[] mins;
+        private double[] maxs;
+        private Creature[] radomFoodCreature;
+
         public FarmField()
         {
             InitializeComponent();
@@ -43,6 +48,9 @@ namespace GAFarm
             mapTimer = new ActionControl.ActionTimer(42, new ActionControl.TimerAction(RefreshFarm));
             graphic = this.CreateGraphics();
             UILog.CreateInstance(rtbLog);
+            mins = new double[4] { minX, minY, 0, 100 };
+            maxs = new double[4] { this.width + minX, this.height + minY, 2 * Math.PI, 200 };
+            radomFoodCreature = GACore.InitCreaturesPerValueOneLimit(preyNum, 4, mins, maxs);
         }
 
         private void FarmFiled_Load(object sender, EventArgs e)
@@ -57,6 +65,34 @@ namespace GAFarm
         {
             MapManager.GetMapFromIndex(0).RefreshCreatures();
             DrawMap();
+            if (MapManager.GetMapFromIndex(0).AllCreatures.Length == creatureNum)
+            {
+                Creature[] allGACreatures = new Creature[MapManager.GetMapFromIndex(0).AllCreatures.Length];
+                for (int i = 0; i < MapManager.GetMapFromIndex(0).AllCreatures.Length; i++)
+                {
+                    allGACreatures[i] = Tools.ConvertToGACreature(MapManager.GetMapFromIndex(0).AllCreatures[i]);
+                }
+                LiveRule liveRule = new LiveRule();
+                liveRule.OldRate = new double[] { 0.1, 0.2, 0.4, 0.2, 0.1 };
+                liveRule.NewRate = new double[] { 0.4, 0.2, 0.2, 0.1, 0.1 };
+                allGACreatures = allGACreatures.OrderByDescending(i => i.Result).ToArray();
+                allGACreatures = GA.Core.GACore.GetNextGenerator2(allGACreatures, allGACreatures.Length, liveRule);
+                Creature[] newGeneration = GACore.MutantPerValueOneLimit(GACore.GetBestCreatures(allGACreatures, 1), 0.3, mins, maxs);
+                List<ICreature> newCreatures = new List<ICreature>();
+                MapManager.GetMapFromIndex(0).ClearCreatures();
+                for (int i = 0; i < newGeneration.Length; i++)
+                {
+                    hunters[i] = new Hunter();
+                    hunters[i].Create(newGeneration[i], new ActionHunter(), 0);
+                    MapManager.GetMapFromIndex(0).AddCreature(hunters[i]);
+                }
+                for (int i = 0; i < preyNum; i++)
+                {
+                    preies[i] = new Hunter();
+                    preies[i].Create(radomFoodCreature[i], new ActionPrey(), 1);
+                    MapManager.GetMapFromIndex(0).AddCreature(preies[i]);
+                }
+            }
         }
 
         private void DrawMap()
@@ -66,11 +102,8 @@ namespace GAFarm
 
         private void CreateToolStripMenuItemOnClick(object sender, EventArgs e)
         {
-            double[] mins = new double[4] { minX, minY, 0, 100 };
-            double[] maxs = new double[4] { this.width + minX, this.height + minY, 2 * Math.PI, 200 };
-
             Creature[] radomHunterCreature = GACore.InitCreaturesPerValueOneLimit(creatureNum, 4, mins, maxs);
-            Creature[] radomFoodCreature = GACore.InitCreaturesPerValueOneLimit(400, 4, mins, maxs);
+            
             for (int i = 0; i < creatureNum; i++)
             {
                 hunters[i] = new Hunter();

@@ -121,6 +121,23 @@ namespace GA.Core
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Get the best part of the creatures.
+        /// </summary>
+        /// <param name="allCreatures"></param>
+        /// <param name="threshold">How many left (1 = 100%)</param>
+        /// <returns></returns>
+        public static Creature[] GetBestCreatures(Creature[] allCreatures, double partial)
+        {
+            List<Creature> bestCreatures = new List<Creature>();
+            Creature[] tempResult = allCreatures.OrderByDescending(i => i.Result).ToArray<Creature>();
+            for (int i = 0; i < tempResult.Length * partial; i++)
+            {
+                bestCreatures.Add(tempResult[i]);
+            }
+            return bestCreatures.ToArray();
+        }
+
         public static Creature[] Mutant(Creature[] creatures, double mutantRate, int creatureNum, double min, double max)
         {
             double span = max - min;
@@ -129,6 +146,19 @@ namespace GA.Core
                 for (int j = 0; j < creatures[i].Value.Length; j++)
                 {
                     creatures[i].Value[j] = min + seedGenerator.NextDouble() * span;
+                }
+            }
+            return creatures;
+        }
+
+        public static Creature[] MutantPerValueOneLimit(Creature[] creatures, double mutantRate, double[] min, double[] max)
+        {
+            for (int i = 0; i < min.Length; i++)
+            {
+                double span = max[i] - min[i];
+                for (int j = (int)(creatures.Length * mutantRate); j < creatures.Length; j++)
+                {
+                    creatures[j].Value[i] = min[i] + seedGenerator.NextDouble() * span;
                 }
             }
             return creatures;

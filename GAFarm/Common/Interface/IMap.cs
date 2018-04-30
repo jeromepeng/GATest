@@ -18,6 +18,8 @@ namespace GAFarm.Common.Interface
 
         int MinY { get; }
 
+        ICreature[] AllCreatures { get; }
+
         void InitialMap(int x, int y, int width, int height);
 
         void AddCreature(ICreature creature);
@@ -38,8 +40,12 @@ namespace GAFarm.Common.Interface
 
         void ClearMap();
 
+        void ClearCreatures();
+
         void DrawCreature(ICreature creature);
 
         void EraseCreature(ICreature creature);
+
+        void ReAddCreatures(ICreature[] creatures);
     }
 }

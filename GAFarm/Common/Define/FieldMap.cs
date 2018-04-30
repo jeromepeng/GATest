@@ -47,8 +47,12 @@ namespace GAFarm.Common.Define
                     mapData[i * width + j] = null;
                 }
             }
-            List<object> items = new List<object>();
-            //items.AddRange(
+        }
+
+        public void ClearCreatures()
+        {
+            ClearMap();
+            allCreatures.Clear();
         }
 
         public void AddCreature(ICreature creature)
@@ -63,6 +67,12 @@ namespace GAFarm.Common.Define
             {
                 AddCreature(creatures[i]);
             }
+        }
+
+        public void ReAddCreatures(ICreature[] creatures)
+        {
+            ClearCreatures();
+            AddCreatures(creatures);
         }
 
         public void DeleteCreature(ICreature creature)
@@ -198,6 +208,14 @@ namespace GAFarm.Common.Define
             get
             {
                 return minY;
+            }
+        }
+
+        public ICreature[] AllCreatures
+        {
+            get
+            {
+                return allCreatures.ToArray();
             }
         }
         #endregion
