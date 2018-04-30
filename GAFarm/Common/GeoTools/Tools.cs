@@ -45,5 +45,25 @@ namespace GAFarm.Common.GeoTools
             }
             return result;
         }
+
+        public static bool CoordinateInBox(int x, int y, int minX, int maxX, int minY, int maxY)
+        {
+            bool result = false;
+            if (x > minX && x < maxX && y > minY && y < maxY)
+            {
+                result = true;
+            }
+            return result;
+        }
+
+        public static bool CoordinateInBox(double x, double y, int minX, int maxX, int minY, int maxY)
+        {
+            bool result = false;
+            if (x > minX && x < maxX && y > minY && y < maxY)
+            {
+                result = true;
+            }
+            return result;
+        }
     }
 }

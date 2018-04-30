@@ -14,7 +14,11 @@ namespace GAFarm.Common.Interface
 
         int Height { get; }
 
-        void InitialMap(int width, int height);
+        int MinX { get; }
+
+        int MinY { get; }
+
+        void InitialMap(int x, int y, int width, int height);
 
         void AddCreature(ICreature creature);
 

@@ -58,6 +58,7 @@
     <Compile Include="Common\Interface\ICreatureAction.cs" />
     <Compile Include="Common\Interface\IFieldAction.cs" />
     <Compile Include="Common\Interface\IMap.cs" />
+    <Compile Include="Common\Log\UILog.cs" />
     <Compile Include="FarmField.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,6 +68,9 @@
     <Compile Include="Manager\MapManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FarmField.resx">
+      <DependentUpon>FarmField.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

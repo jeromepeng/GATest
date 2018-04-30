@@ -12,9 +12,11 @@ namespace GAFarm.Common.Interface
 
         double TurnAndMoveTo(GeoInfo geoInfo, double speed);
 
-        void Die();
+        void Die(ICreature self);
 
         ScanResult[] Scan(GeoInfo centerInfo, double radius, IMap filedMap);
+
+        void Eat(ICreature creatureToBeEaten);
 
     }
 }

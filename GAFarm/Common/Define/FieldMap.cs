@@ -4,12 +4,18 @@ using System.Linq;
 using System.Text;
 
 using GAFarm.Common.Interface;
+using GAFarm.Common.Log;
+
 namespace GAFarm.Common.Define
 {
     public class FieldMap : IMap, IDisposable
     {
         #region Private Member
         private ICreature[] mapData;
+
+        private int minX;
+
+        private int minY;
 
         private int width;
 
@@ -22,12 +28,14 @@ namespace GAFarm.Common.Define
         #endregion
 
         #region Interface Implement
-        public void InitialMap(int width, int height)
+        public void InitialMap(int x, int y, int width, int height)
         {
             mapData = new ICreature[width * height];
             ClearMap();
             this.width = width;
             this.height = height;
+            this.minX = x;
+            this.minY = y;
         }
 
         public void ClearMap()
@@ -76,17 +84,29 @@ namespace GAFarm.Common.Define
             int x = (int)pt.DimensionInfo[0];
             int y = (int)pt.DimensionInfo[1];
             List<ICreature> results = new List<ICreature>();
-            for (int i = x - size; i < x + size; i++)
+            int minX = x - size;
+            int maxX = x + size;
+            int minY = y - size;
+            int maxY = y + size;
+            for (int i = 0; i < allCreatures.Count; i++)
             {
-                for (int j = y - size; j < y + size; j++)
+                if (GeoTools.Tools.CoordinateInBox(allCreatures[i].CurrentX, allCreatures[i].CurrentY, minX, maxX, minY, maxY))
                 {
-                    if (mapData[j * width + i] != null)
-                    {
-                        results.Add(FindCreatureByName(mapData[j * width + i].ID));
-                        break;
-                    }
+                    results.Add(allCreatures[i]);
                 }
             }
+            //for (int i = x - size; i < x + size; i++)
+            //{
+            //    for (int j = y - size; j < y + size; j++)
+            //    {
+            //        int index = j * width + i;
+            //        if (index > 0 && index < mapData.Length && mapData[index] != null)
+            //        {
+            //            results.Add(mapData[index]);
+            //            break;
+            //        }
+            //    }
+            //}
             return results.ToArray();
         }
 
@@ -100,8 +120,16 @@ namespace GAFarm.Common.Define
             ClearMap();
             for (int i = 0; i < allCreatures.Count; i++)
             {
-                allCreatures[i].Move();
-                DrawCreature(allCreatures[i]);
+                try
+                {
+                    allCreatures[i].Move();
+                    allCreatures[i].ScanStart();
+                    DrawCreature(allCreatures[i]);
+                }
+                catch (Exception ex)
+                {
+                    return;
+                }
             }
         }
 
@@ -112,12 +140,12 @@ namespace GAFarm.Common.Define
 
         public void DrawCreature(ICreature creature)
         {
-            mapData[(int)creature.CurrentY * this.width + (int)creature.CurrentX] = creature;
+            mapData[(int)(creature.CurrentY - minY) * this.width + (int)creature.CurrentX - minX] = creature;
         }
 
         public void EraseCreature(ICreature creature)
         {
-            mapData[(int)creature.CurrentY * this.width + (int)creature.CurrentX] = null;
+            mapData[(int)(creature.CurrentY - minY) * this.width + (int)creature.CurrentX - minX] = null;
         }
 
         public void Dispose()
@@ -154,6 +182,22 @@ namespace GAFarm.Common.Define
             get
             {
                 return height;
+            }
+        }
+
+        public int MinX
+        {
+            get
+            {
+                return minX;
+            }
+        }
+
+        public int MinY
+        {
+            get
+            {
+                return minY;
             }
         }
         #endregion

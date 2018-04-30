@@ -17,10 +17,10 @@ namespace GAFarm.Action.ActionControl
             moveResultGeoInfo.DimensionInfo[0] = startPt.DimensionInfo[0] + length * Math.Sin(direction);
             moveResultGeoInfo.DimensionInfo[1] = startPt.DimensionInfo[1] + length * Math.Cos(direction);
             MoveResult result = null;
-            if (moveResultGeoInfo.DimensionInfo[0] > 0
-                && moveResultGeoInfo.DimensionInfo[0] < fieldMap.Width
-                && moveResultGeoInfo.DimensionInfo[1] > 0
-                && moveResultGeoInfo.DimensionInfo[1] < fieldMap.Height)
+            if (moveResultGeoInfo.DimensionInfo[0] > fieldMap.MinX
+                && moveResultGeoInfo.DimensionInfo[0] < fieldMap.Width + fieldMap.MinX
+                && moveResultGeoInfo.DimensionInfo[1] > fieldMap.MinY
+                && moveResultGeoInfo.DimensionInfo[1] < fieldMap.Height + fieldMap.MinY)
             {
                 result = new MoveResult(moveResultGeoInfo);
                 creature.CurrentX = result.X;
@@ -34,9 +34,9 @@ namespace GAFarm.Action.ActionControl
             return 0;
         }
 
-        public void Die()
+        public void Die(ICreature self)
         {
-
+            self.IsDead = true;
         }
 
         public ScanResult[] Scan(GeoInfo centerInfo, double radius, IMap fieldMap)
@@ -48,6 +48,11 @@ namespace GAFarm.Action.ActionControl
                 result[i] = new ScanResult(true, scanResult[i]);
             }
             return result;
+        }
+
+        public void Eat(ICreature creatureToBeEaten)
+        {
+            creatureToBeEaten.BeEaten();
         }
         #endregion
     }

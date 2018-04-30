@@ -34,6 +34,7 @@
             this.beginToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.killToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -43,7 +44,7 @@
             this.beginToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1017, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(971, 25);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -55,20 +56,20 @@
             this.killToolStripMenuItem,
             this.settingToolStripMenuItem});
             this.beginToolStripMenuItem.Name = "beginToolStripMenuItem";
-            this.beginToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.beginToolStripMenuItem.Size = new System.Drawing.Size(63, 21);
             this.beginToolStripMenuItem.Text = "Control";
             // 
             // createToolStripMenuItem
             // 
             this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.createToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.createToolStripMenuItem.Text = "Create";
             this.createToolStripMenuItem.Click += new System.EventHandler(this.CreateToolStripMenuItemOnClick);
             // 
             // beginToolStripMenuItem1
             // 
             this.beginToolStripMenuItem1.Name = "beginToolStripMenuItem1";
-            this.beginToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.beginToolStripMenuItem1.Size = new System.Drawing.Size(116, 22);
             this.beginToolStripMenuItem1.Text = "Begin";
             // 
             // killToolStripMenuItem
@@ -76,24 +77,34 @@
             this.killToolStripMenuItem.Name = "killToolStripMenuItem";
             this.killToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.killToolStripMenuItem.Text = "Kill";
+            this.killToolStripMenuItem.Click += new System.EventHandler(this.KillToolStripMenuItemOnClick);
             // 
             // settingToolStripMenuItem
             // 
             this.settingToolStripMenuItem.Name = "settingToolStripMenuItem";
-            this.settingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.settingToolStripMenuItem.Text = "Setting";
             // 
-            // FarmFiled
+            // rtbLog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.rtbLog.Location = new System.Drawing.Point(1, 384);
+            this.rtbLog.Name = "rtbLog";
+            this.rtbLog.Size = new System.Drawing.Size(970, 267);
+            this.rtbLog.TabIndex = 1;
+            this.rtbLog.Text = "";
+            // 
+            // FarmField
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlText;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(1017, 445);
+            this.ClientSize = new System.Drawing.Size(971, 651);
+            this.Controls.Add(this.rtbLog);
             this.Controls.Add(this.menuStrip1);
             this.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "FarmFiled";
+            this.Name = "FarmField";
             this.Text = "Form1";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FieldFormOnClosed);
             this.Load += new System.EventHandler(this.FarmFiled_Load);
@@ -113,6 +124,7 @@
         private System.Windows.Forms.ToolStripMenuItem beginToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem killToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingToolStripMenuItem;
+        private System.Windows.Forms.RichTextBox rtbLog;
     }
 }
 

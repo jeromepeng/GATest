@@ -14,26 +14,35 @@ using GAFarm.Common.Define;
 using GAFarm.Action.ActionControl;
 using GAFarm.Common.GeoTools;
 using GAFarm.Manager;
+using GAFarm.Common.Log;
+
 namespace GAFarm
 {
     public partial class FarmField : Form
     {
-        static int creatureNum = 50;
-        static int preyNum = 50;
+        static int creatureNum = 10;
+        static int preyNum = 10;
         Hunter[] hunters = new Hunter[creatureNum];
         Hunter[] preies = new Hunter[preyNum];
         ActionControl.ActionTimer mapTimer;
         Pen pen = new Pen(Color.White);
         Pen penPrey = new Pen(Color.Blue);
         Graphics graphic;
+        private int width;
+        private int height;
+        private int minX = 100;
+        private int minY = -100;
         public FarmField()
         {
             InitializeComponent();
             FieldMap thisMap = new FieldMap();
-            thisMap.InitialMap(this.ClientRectangle.Right, this.ClientRectangle.Bottom);
+            width = 200;
+            height = 200;
+            thisMap.InitialMap(minX, minY, width, height);
             MapManager.AddMap(thisMap);
             mapTimer = new ActionControl.ActionTimer(42, new ActionControl.TimerAction(RefreshFarm));
             graphic = this.CreateGraphics();
+            UILog.CreateInstance(rtbLog);
         }
 
         private void FarmFiled_Load(object sender, EventArgs e)
@@ -57,8 +66,8 @@ namespace GAFarm
 
         private void CreateToolStripMenuItemOnClick(object sender, EventArgs e)
         {
-            double[] mins = new double[4] { 0, 0, 0, 0 };
-            double[] maxs = new double[4] { this.ClientRectangle.Right, this.ClientRectangle.Bottom, 2 * Math.PI, 200 };
+            double[] mins = new double[4] { minX, minY, 0, 100 };
+            double[] maxs = new double[4] { this.width + minX, this.height + minY, 2 * Math.PI, 200 };
 
             Creature[] radomHunterCreature = GACore.InitCreaturesPerValueOneLimit(creatureNum, 4, mins, maxs);
             Creature[] radomFoodCreature = GACore.InitCreaturesPerValueOneLimit(400, 4, mins, maxs);
@@ -102,20 +111,21 @@ namespace GAFarm
             {
                 for (int j = 0; j < MapManager.GetMapFromIndex(0).Width; j++)
                 {
-                    if (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j] != null)
+                    if (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j] != null &&
+                        !MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].IsDead)
                     {
                         switch (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].Type)
                         {
                             case 0:
                                 {
-                                    Tools.FieldToClient(j, i, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+                                    Tools.FieldToClient(j + minX, i + minY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
                                     graphicBmp.DrawRectangle(pen, newX - 5, newY - 5, 10, 10);
                                     graphic.DrawImage(bmp, 0, 0);
                                     break;
                                 }
                             case 1:
                                 {
-                                    Tools.FieldToClient(j, i, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+                                    Tools.FieldToClient(j + minX, i + minY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
                                     graphicBmp.DrawRectangle(penPrey, newX - 3, newY - 3, 6, 6);
                                     graphic.DrawImage(bmp, 0, 0);
                                     break;
@@ -131,6 +141,11 @@ namespace GAFarm
             }
             bmp.Dispose();
             graphicBmp.Dispose();
+        }
+
+        private void KillToolStripMenuItemOnClick(object sender, EventArgs e)
+        {
+            mapTimer.StopTimer();
         }
     }
 }

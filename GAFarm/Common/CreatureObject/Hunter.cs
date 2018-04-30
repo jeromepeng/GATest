@@ -6,6 +6,8 @@ using System.Text;
 using ActionControl;
 using GAFarm.Common.Define;
 using GAFarm.Common.Interface;
+using GAFarm.Common.Log;
+
 namespace GAFarm.Common.CreatureObject
 {
     public class Hunter : ICreature
@@ -13,7 +15,7 @@ namespace GAFarm.Common.CreatureObject
         #region Private Member
         private ICreatureAction hunterAction;
 
-        private double scanSize = 20;
+        private double scanSize = 10;
 
         private double bornX;
 
@@ -46,6 +48,8 @@ namespace GAFarm.Common.CreatureObject
         private int id = 0;
 
         private int type = 0;
+
+        private MoveResult lastMoveResult;
 
         #endregion
 
@@ -119,13 +123,29 @@ namespace GAFarm.Common.CreatureObject
 
         public void ScanAction()
         {
-            ScanResult[] scanResults = hunterAction.Scan(new GeoInfo(new double[] { currentX, currentY }), scanSize, Manager.MapManager.GetMapFromIndex(0));
-            scanResult = scanResults[0];
+            try
+            {
+                ScanResult[] scanResults = hunterAction.Scan(new GeoInfo(new double[] { currentX, currentY }), scanSize, Manager.MapManager.GetMapFromIndex(0));
+                if (scanResults != null && scanResults.Length > 0)
+                {
+                    for (int i = 0; i < scanResults.Length; i++)
+                    {
+                        if (scanResults[i].TargetCreature.Type == 1 && !scanResults[i].TargetCreature.IsDead)
+                        {
+                            hunterAction.Eat(scanResults[i].TargetCreature);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
         }
 
         public void BeEaten()
         {
-            hunterAction.Die();
+            hunterAction.Die(this);
         }
         #endregion
 
@@ -191,33 +211,26 @@ namespace GAFarm.Common.CreatureObject
         #region Private Method
         private void MoveAction()
         {
-            if (scanResult != null)
-            {
-                if (!scanResult.TargetCreature.IsDead && GeoTools.Tools.GetLength(new GeoInfo(new double[] { CurrentX, CurrentY }), scanResult.ScanGeoInfo) > creatureSize)
-                {
-                    restMoveLength = moveLength;
-                    hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
-                }
-                else if (scanResult.TargetCreature.Type == 1)
-                {
-                    Eat(scanResult.TargetCreature);
-                }
-            }
-            else
+            if (lastMoveResult != null)
             {
                 if (restMoveLength > 0)
                 {
-                    hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
+                    lastMoveResult = hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
                     restMoveLength -= speed / 24;
                 }
                 else
                 {
                     restMoveLength = moveLength;
                     currentDirection += moveDirStep;
+                    lastMoveResult = hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
                 }
-
             }
+            else
+            {
+                currentDirection += moveDirStep;
+                lastMoveResult = hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
+            }
+            #endregion
         }
-        #endregion
     }
 }

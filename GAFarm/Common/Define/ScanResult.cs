@@ -17,7 +17,9 @@ namespace GAFarm.Common.Define
 
         public ScanResult(bool isFind, ICreature target)
         {
-            geoInfo.DimensionInfo = new double[2];
+            geoInfo = new GeoInfo(new double[2]);
+            geoInfo.DimensionInfo[0] = target.CurrentX;
+            geoInfo.DimensionInfo[1] = target.CurrentY;
             this.isFind = isFind;
             this.targetCreature = target;
         }
