@@ -25,8 +25,8 @@ namespace GAFarm.Action.ActionControl
 
         public void Die(ICreature self)
         {
-            //UILog.LogToTextBox(self.IsDead.ToString());
             self.IsDead = true;
+            //UILog.LogToTextBox(self.IsDead.ToString());
         }
 
         public ScanResult[] Scan(GeoInfo centerInfo, double radius, IMap fieldMap)

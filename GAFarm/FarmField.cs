@@ -22,7 +22,7 @@ namespace GAFarm
     public partial class FarmField : Form
     {
         static int creatureNum = 10;
-        static int preyNum = 10;
+        static int preyNum = 40;
         Hunter[] hunters = new Hunter[creatureNum];
         Hunter[] preies = new Hunter[preyNum];
         ActionControl.ActionTimer mapTimer;
@@ -35,22 +35,28 @@ namespace GAFarm
         private int minY = -100;
         private double[] mins;
         private double[] maxs;
+        private double[] preyMins;
+        private double[] preyMaxs;
         private Creature[] radomFoodCreature;
+        private long lastTimeTick;
 
         public FarmField()
         {
             InitializeComponent();
+            int region = 90;
             FieldMap thisMap = new FieldMap();
             width = 200;
             height = 200;
             thisMap.InitialMap(minX, minY, width, height);
             MapManager.AddMap(thisMap);
-            mapTimer = new ActionControl.ActionTimer(42, new ActionControl.TimerAction(RefreshFarm));
+            mapTimer = new ActionControl.ActionTimer(21, new ActionControl.TimerAction(RefreshFarm));
             graphic = this.CreateGraphics();
             UILog.CreateInstance(rtbLog);
             mins = new double[4] { minX, minY, 0, 100 };
             maxs = new double[4] { this.width + minX, this.height + minY, 2 * Math.PI, 200 };
-            radomFoodCreature = GACore.InitCreaturesPerValueOneLimit(preyNum, 4, mins, maxs);
+            preyMins = new double[4] { minX + region, minY + region, 0, 100 };
+            preyMaxs = new double[4] { this.width + minX - region, this.height + minY - region, 2 * Math.PI, 200 };
+            radomFoodCreature = GACore.InitCreaturesPerValueOneLimit(preyNum, 4, preyMins, preyMaxs);
         }
 
         private void FarmFiled_Load(object sender, EventArgs e)
@@ -65,32 +71,43 @@ namespace GAFarm
         {
             MapManager.GetMapFromIndex(0).RefreshCreatures();
             DrawMap();
-            if (MapManager.GetMapFromIndex(0).AllCreatures.Length == creatureNum)
+            int aliveCreatureNum = MapManager.GetMapFromIndex(0).AliveCreatures.Length;
+            if (aliveCreatureNum <= creatureNum + preyNum * 0.1)
             {
-                Creature[] allGACreatures = new Creature[MapManager.GetMapFromIndex(0).AllCreatures.Length];
-                for (int i = 0; i < MapManager.GetMapFromIndex(0).AllCreatures.Length; i++)
+                try
                 {
-                    allGACreatures[i] = Tools.ConvertToGACreature(MapManager.GetMapFromIndex(0).AllCreatures[i]);
+                    UILog.LogToTextBox("Cost:" + (DateTime.Now.Ticks - lastTimeTick) / 10000 + " ms");
+                    Creature[] allGACreatures = new Creature[creatureNum];
+                    ICreature[] allHunters = MapManager.GetMapFromIndex(0).GetCreaturesByType(0);
+                    for (int i = 0; i < creatureNum; i++)
+                    {
+                        allGACreatures[i] = Tools.ConvertToGACreature(allHunters[i]);
+                    }
+                    LiveRule liveRule = new LiveRule();
+                    liveRule.OldRate = new double[] { 0.1, 0.2, 0.4, 0.2, 0.1 };
+                    liveRule.NewRate = new double[] { 0.4, 0.2, 0.2, 0.1, 0.1 };
+                    allGACreatures = allGACreatures.OrderByDescending(i => i.Result).ToArray();
+                    Creature[] newGeneration = GA.Core.GACore.GetNextGenerator2(allGACreatures, allGACreatures.Length, liveRule);
+                    //Creature[] newGeneration = GACore.MutantPerValueOneLimit(GACore.GetBestCreatures(allGACreatures, 1), 0.3, mins, maxs);
+                    List<ICreature> newCreatures = new List<ICreature>();
+                    MapManager.GetMapFromIndex(0).ClearCreatures();
+                    for (int i = 0; i < newGeneration.Length; i++)
+                    {
+                        hunters[i] = new Hunter();
+                        hunters[i].Create(newGeneration[i], new ActionHunter(), 0);
+                        MapManager.GetMapFromIndex(0).AddCreature(hunters[i]);
+                    }
+                    for (int i = 0; i < preyNum; i++)
+                    {
+                        preies[i] = new Hunter();
+                        preies[i].Create(radomFoodCreature[i], new ActionPrey(), 1);
+                        MapManager.GetMapFromIndex(0).AddCreature(preies[i]);
+                    }
+                    lastTimeTick = DateTime.Now.Ticks;
                 }
-                LiveRule liveRule = new LiveRule();
-                liveRule.OldRate = new double[] { 0.1, 0.2, 0.4, 0.2, 0.1 };
-                liveRule.NewRate = new double[] { 0.4, 0.2, 0.2, 0.1, 0.1 };
-                allGACreatures = allGACreatures.OrderByDescending(i => i.Result).ToArray();
-                allGACreatures = GA.Core.GACore.GetNextGenerator2(allGACreatures, allGACreatures.Length, liveRule);
-                Creature[] newGeneration = GACore.MutantPerValueOneLimit(GACore.GetBestCreatures(allGACreatures, 1), 0.3, mins, maxs);
-                List<ICreature> newCreatures = new List<ICreature>();
-                MapManager.GetMapFromIndex(0).ClearCreatures();
-                for (int i = 0; i < newGeneration.Length; i++)
+                catch (Exception ex)
                 {
-                    hunters[i] = new Hunter();
-                    hunters[i].Create(newGeneration[i], new ActionHunter(), 0);
-                    MapManager.GetMapFromIndex(0).AddCreature(hunters[i]);
-                }
-                for (int i = 0; i < preyNum; i++)
-                {
-                    preies[i] = new Hunter();
-                    preies[i].Create(radomFoodCreature[i], new ActionPrey(), 1);
-                    MapManager.GetMapFromIndex(0).AddCreature(preies[i]);
+                    UILog.LogToTextBox(ex.ToString());
                 }
             }
         }
@@ -117,6 +134,7 @@ namespace GAFarm
                 MapManager.GetMapFromIndex(0).AddCreature(preies[i]);
             }
             DrawMap();
+            lastTimeTick = DateTime.Now.Ticks;
             mapTimer.StartTimer();
         }
 
@@ -140,38 +158,61 @@ namespace GAFarm
             Bitmap bmp = new Bitmap(this.Width, this.Height);
             graphic.DrawImage(bmp, 0, 0);
             Graphics graphicBmp = Graphics.FromImage(bmp);
-            for (int i = 0; i < MapManager.GetMapFromIndex(0).Height; i++)
+            foreach (ICreature creature in MapManager.GetMapFromIndex(0).AllCreatures)
             {
-                for (int j = 0; j < MapManager.GetMapFromIndex(0).Width; j++)
+                if (!creature.IsDead)
                 {
-                    if (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j] != null &&
-                        !MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].IsDead)
+                    switch (creature.Type)
                     {
-                        switch (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].Type)
-                        {
-                            case 0:
-                                {
-                                    Tools.FieldToClient(j + minX, i + minY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
-                                    graphicBmp.DrawRectangle(pen, newX - 5, newY - 5, 10, 10);
-                                    graphic.DrawImage(bmp, 0, 0);
-                                    break;
-                                }
-                            case 1:
-                                {
-                                    Tools.FieldToClient(j + minX, i + minY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
-                                    graphicBmp.DrawRectangle(penPrey, newX - 3, newY - 3, 6, 6);
-                                    graphic.DrawImage(bmp, 0, 0);
-                                    break;
-                                }
-                            default:
-                                {
-                                    break;
-                                }
-                        }
-                        
+                        case 0:
+                            {
+                                Tools.FieldToClient((int)creature.CurrentX, (int)creature.CurrentY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+                                graphicBmp.DrawRectangle(pen, newX - 5, newY - 5, 10, 10);
+                                graphic.DrawImage(bmp, 0, 0);
+                                break;
+                            }
+                        case 1:
+                            {
+                                Tools.FieldToClient((int)creature.CurrentX, (int)creature.CurrentY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+                                graphicBmp.DrawRectangle(penPrey, newX - 3, newY - 3, 6, 6);
+                                graphic.DrawImage(bmp, 0, 0);
+                                break;
+                            }
                     }
                 }
             }
+            //for (int i = 0; i < MapManager.GetMapFromIndex(0).Height; i++)
+            //{
+            //    for (int j = 0; j < MapManager.GetMapFromIndex(0).Width; j++)
+            //    {
+            //        if (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j] != null &&
+            //            !MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].IsDead)
+            //        {
+            //            switch (MapManager.GetMapFromIndex(0).MapData[i * MapManager.GetMapFromIndex(0).Width + j].Type)
+            //            {
+            //                case 0:
+            //                    {
+            //                        Tools.FieldToClient(j + minX, i + minY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+            //                        graphicBmp.DrawRectangle(pen, newX - 5, newY - 5, 10, 10);
+            //                        graphic.DrawImage(bmp, 0, 0);
+            //                        break;
+            //                    }
+            //                case 1:
+            //                    {
+            //                        Tools.FieldToClient(j + minX, i + minY, ref newX, ref newY, MapManager.GetMapFromIndex(0).Height);
+            //                        graphicBmp.DrawRectangle(penPrey, newX - 3, newY - 3, 6, 6);
+            //                        graphic.DrawImage(bmp, 0, 0);
+            //                        break;
+            //                    }
+            //                default:
+            //                    {
+            //                        break;
+            //                    }
+            //            }
+            //            
+            //        }
+            //    }
+            //}
             bmp.Dispose();
             graphicBmp.Dispose();
         }

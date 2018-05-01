@@ -33,7 +33,7 @@ namespace GAFarm.Common.CreatureObject
 
         private double restMoveLength;
 
-        private double speed = 20;
+        private double speed = 40;
 
         private double creatureSize = 20;
 
@@ -240,7 +240,7 @@ namespace GAFarm.Common.CreatureObject
                 else
                 {
                     restMoveLength = moveLength;
-                    currentDirection += moveDirStep;
+                    //currentDirection += moveDirStep;
                     lastMoveResult = hunterAction.Move(this, new GeoInfo(new double[] { currentX, currentY }), speed / 24, currentDirection, Manager.MapManager.GetMapFromIndex(0));
                 }
             }

@@ -8,7 +8,7 @@ namespace GAFarm.Common.Interface
 {
     public interface IMap
     {
-        ICreature[] MapData { get; }
+        //ICreature[] MapData { get; }
 
         int Width { get; }
 
@@ -17,6 +17,8 @@ namespace GAFarm.Common.Interface
         int MinX { get; }
 
         int MinY { get; }
+
+        ICreature[] AliveCreatures { get; }
 
         ICreature[] AllCreatures { get; }
 
@@ -42,10 +44,12 @@ namespace GAFarm.Common.Interface
 
         void ClearCreatures();
 
-        void DrawCreature(ICreature creature);
+        //void DrawCreature(ICreature creature);
 
-        void EraseCreature(ICreature creature);
+        //void EraseCreature(ICreature creature);
 
         void ReAddCreatures(ICreature[] creatures);
+
+        ICreature[] GetCreaturesByType(int type);
     }
 }

@@ -11,7 +11,7 @@ namespace GAFarm.Common.Define
     public class FieldMap : IMap, IDisposable
     {
         #region Private Member
-        private ICreature[] mapData;
+        //private ICreature[] mapData;
 
         private int minX;
 
@@ -21,7 +21,11 @@ namespace GAFarm.Common.Define
 
         private int height;
 
-        List<ICreature> allCreatures = new List<ICreature>();
+        private List<ICreature> allCreatures = new List<ICreature>();
+
+        private ICreature[] aliveCreatures = null;
+
+        private Dictionary<int, List<ICreature>> creaturesDicByType = new Dictionary<int, List<ICreature>>();
         #endregion
 
         #region
@@ -30,7 +34,7 @@ namespace GAFarm.Common.Define
         #region Interface Implement
         public void InitialMap(int x, int y, int width, int height)
         {
-            mapData = new ICreature[width * height];
+            //mapData = new ICreature[width * height];
             ClearMap();
             this.width = width;
             this.height = height;
@@ -40,25 +44,31 @@ namespace GAFarm.Common.Define
 
         public void ClearMap()
         {
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    mapData[i * width + j] = null;
-                }
-            }
+            //for (int i = 0; i < height; i++)
+            //{
+            //    for (int j = 0; j < width; j++)
+            //    {
+            //        mapData[i * width + j] = null;
+            //    }
+            //}
         }
 
         public void ClearCreatures()
         {
             ClearMap();
             allCreatures.Clear();
+            creaturesDicByType.Clear();
         }
 
         public void AddCreature(ICreature creature)
         {
-            DrawCreature(creature);
+            //DrawCreature(creature);
             allCreatures.Add(creature);
+            if (!creaturesDicByType.ContainsKey(creature.Type))
+            {
+                creaturesDicByType.Add(creature.Type, new List<ICreature>());  
+            }
+            creaturesDicByType[creature.Type].Add(creature);
         }
 
         public void AddCreatures(ICreature[] creatures)
@@ -77,7 +87,7 @@ namespace GAFarm.Common.Define
 
         public void DeleteCreature(ICreature creature)
         {
-            EraseCreature(creature);
+            //EraseCreature(creature);
             allCreatures.Remove(creature);
         }
 
@@ -134,13 +144,14 @@ namespace GAFarm.Common.Define
                 {
                     allCreatures[i].Move();
                     allCreatures[i].ScanStart();
-                    DrawCreature(allCreatures[i]);
+                    //DrawCreature(allCreatures[i]);
                 }
                 catch (Exception ex)
                 {
                     return;
                 }
             }
+            aliveCreatures = allCreatures.Where(x => x.IsDead == false).ToArray();
         }
 
         public void RefreshCreature(int id)
@@ -148,14 +159,19 @@ namespace GAFarm.Common.Define
 
         }
 
-        public void DrawCreature(ICreature creature)
-        {
-            mapData[(int)(creature.CurrentY - minY) * this.width + (int)creature.CurrentX - minX] = creature;
-        }
+        //public void DrawCreature(ICreature creature)
+        //{
+        //    mapData[(int)(creature.CurrentY - minY) * this.width + (int)creature.CurrentX - minX] = creature;
+        //}
 
-        public void EraseCreature(ICreature creature)
+        //public void EraseCreature(ICreature creature)
+        //{
+        //    mapData[(int)(creature.CurrentY - minY) * this.width + (int)creature.CurrentX - minX] = null;
+        //}
+
+        public ICreature[] GetCreaturesByType(int type)
         {
-            mapData[(int)(creature.CurrentY - minY) * this.width + (int)creature.CurrentX - minX] = null;
+            return creaturesDicByType[type].ToArray();
         }
 
         public void Dispose()
@@ -165,19 +181,19 @@ namespace GAFarm.Common.Define
 
         ~FieldMap()
         {
-            mapData = null;
+            //mapData = null;
             allCreatures.Clear();
         }
         #endregion
 
         #region Public Member
-        public ICreature[] MapData
-        {
-            get
-            {
-                return mapData;
-            }
-        }
+        //public ICreature[] MapData
+        //{
+        //    get
+        //    {
+        //        return mapData;
+        //    }
+        //}
 
         public int Width
         {
@@ -216,6 +232,14 @@ namespace GAFarm.Common.Define
             get
             {
                 return allCreatures.ToArray();
+            }
+        }
+
+        public ICreature[] AliveCreatures
+        {
+            get
+            {
+                return aliveCreatures;
             }
         }
         #endregion

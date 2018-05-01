@@ -215,7 +215,8 @@ namespace GA.Core
                         double baseValue = father.Value[k] > mother.Value[k] ? mother.Value[k] : father.Value[k];
                         double distance = Math.Abs(father.Value[k] - mother.Value[k]);
                         /*children[index + j].Value[k] = baseValue + Math.Abs(father.Value[k] - mother.Value[k]) * 0.618;*/
-                        children[index + j].Value[k] = baseValue - distance + seedGenerator.NextDouble() * 3 * distance;
+                        //children[index + j].Value[k] = baseValue - distance + seedGenerator.NextDouble() * 3 * distance;
+                        children[index + j].Value[k] = baseValue + seedGenerator.NextDouble() * distance;
                     }
                 }
                 index += levelCreature;
